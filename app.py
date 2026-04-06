@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# all the css styling for dark theme and professional look
+# all the css styling 
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
@@ -222,7 +222,7 @@ def ask_openai(prompt, api_key, model_name):
         return "OpenAI Error: " + str(e)
 
 
-# ---- calling gemini api ----
+# ---- calling gROQ api ----
 def ask_groq(prompt, api_key):
     try:
         import requests
@@ -250,20 +250,10 @@ def ask_groq(prompt, api_key):
 
 
 # ---- this function decides which ai to call based on sidebar selection ----
-def get_ai_response(prompt):
-    selected_model = st.session_state.get("ai_model", "Groq LLaMA 3.3 (Free)")
+GROQ_API_KEY = "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"  # 👈 paste your key here
 
-    if "OpenAI" in selected_model:
-        key = st.session_state.get("openai_key", "")
-        if not key:
-            return "Please enter your OpenAI API key in the sidebar first!"
-        model_name = "gpt-4o" if "4o" in selected_model else "gpt-4-turbo"
-        return ask_openai(prompt, key, model_name)
-    else:
-        key = st.session_state.get("groq_key", "")
-        if not key:
-            return "⚠️ Please enter your Groq API key in the sidebar. Get one free at console.groq.com"
-        return ask_groq(prompt, key)
+def get_ai_response(prompt):
+    return ask_groq(prompt, GROQ_API_KEY)
 
 
 # ---- session state setup ----
@@ -299,30 +289,6 @@ with st.sidebar:
         if st.button(page_name, key="btn_" + page_name, use_container_width=True):
             st.session_state.active_page = page_name
             st.rerun()
-
-    st.markdown("<hr style='border:none;border-top:1px solid #2a2a3a;margin:18px 0 14px 0;'>", unsafe_allow_html=True)
-    st.markdown("<div style='font-family:Syne,sans-serif;font-size:13px;font-weight:700;color:#888899;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;'>⚙️ AI Settings</div>", unsafe_allow_html=True)
-
-    # model selection
-    model_options = ["Groq LLaMA 3.3 (Free)", "OpenAI GPT-4o", "OpenAI GPT-4 Turbo"]
-    st.selectbox("Choose AI Model", model_options, key="ai_model")
-
-    # show api key input based on which model is selected
-    if "OpenAI" in st.session_state.get("ai_model", ""):
-        st.text_input("OpenAI API Key", type="password", key="openai_key", placeholder="sk-...")
-        st.markdown("<div style='font-size:11px;color:#888899;'>Get key: <a href='https://platform.openai.com' target='_blank' style='color:#7c6df8;'>platform.openai.com</a></div>", unsafe_allow_html=True)
-    else:
-        st.text_input("Groq API Key (FREE)", type="password", key="groq_key", placeholder="gsk_...")
-        st.markdown("<div style='font-size:11px;color:#66bb6a;'>✅ Free at: <a href='https://console.groq.com' target='_blank' style='color:#66bb6a;'>console.groq.com</a></div>", unsafe_allow_html=True)
-
-    # connection status
-    has_key = bool(st.session_state.get("openai_key") or st.session_state.get("groq_key"))
-    if has_key:
-        st.markdown("<div style='font-size:13px;color:#66bb6a;font-weight:600;margin-top:10px;'>● Connected</div>", unsafe_allow_html=True)
-    else:
-        st.markdown("<div style='font-size:13px;color:#f06292;font-weight:600;margin-top:10px;'>● No API Key</div>", unsafe_allow_html=True)
-
-
 # ==============================================================================
 # PAGE: HOME
 # ==============================================================================
@@ -336,7 +302,6 @@ if current_page == "Home":
         <p class='hero-sub'>Your intelligent assistant for every kind of document — powered by GPT-4o & Gemini</p>
     </div>
     """, unsafe_allow_html=True)
-
     col1, col2 = st.columns(2)
 
     with col1:
@@ -458,7 +423,7 @@ elif current_page == "Resume Analyzer":
                 if job_description:
                     jd_part = "\n\nJob Description:\n" + job_description[:3000]
 
-                prompt = "You are an expert ATS analyzer and career coach.\n\nAnalyze this resume for the role: " + (job_title or "General Professional Role") + jd_part + "\n\nResume:\n---\n" + resume_text[:8000] + "\n---\n\nGive a full analysis in this exact format:\n\n## 🎯 ATS Compatibility Score: [X/100]\n\n## 📊 Category Scores\n- **Formatting and Structure**: [X/10] — [brief reason]\n- **Keywords and Skills Match**: [X/10] — [brief reason]\n- **Experience Section**: [X/10] — [brief reason]\n- **Education and Certifications**: [X/10] — [brief reason]\n- **Quantified Achievements**: [X/10] — [brief reason]\n\n## ✅ Strengths (Top 5)\n[List the top 5 strengths]\n\n## ❌ Critical Issues (Must Fix)\n[List must-fix problems]\n\n## 🔑 Missing Keywords and Skills\n[List important missing keywords for this role]\n\n## 💡 Top 5 Actionable Improvements\n[List specific improvement steps]\n\n## 📝 Suggested Professional Summary\n[Write an improved 3-4 line professional summary]\n\n## 🏆 Final Verdict\n[2-3 sentence overall assessment]"
+                prompt = "You are an expert ATS analyzer and career coach.\n\nAnalyze this resume for the role: " + (job_title or "General Professional Role") + jd_part + "\n\nResume:\n---\n" + resume_text[:8000] + "\n---\n\nGive a full analysis in this exact format:\n\n##  ATS Compatibility Score: [X/100]\n\n##  Category Scores\n- **Formatting and Structure**: [X/10] — [brief reason]\n- **Keywords and Skills Match**: [X/10] — [brief reason]\n- **Experience Section**: [X/10] — [brief reason]\n- **Education and Certifications**: [X/10] — [brief reason]\n- **Quantified Achievements**: [X/10] — [brief reason]\n\n## Strengths (Top 5)\n[List the top 5 strengths]\n\n##  Critical Issues (Must Fix)\n[List must-fix problems]\n\n##  Missing Keywords and Skills\n[List important missing keywords for this role]\n\n## Top 5 Actionable Improvements\n[List specific improvement steps]\n\n##  Suggested Professional Summary\n[Write an improved 3-4 line professional summary]\n\n## Final Verdict\n[2-3 sentence overall assessment]"
 
                 with st.spinner("Analyzing your resume..."):
                     result = get_ai_response(prompt)
@@ -510,7 +475,7 @@ elif current_page == "Legal Analyzer":
                 if party:
                     party_part = "\nReviewing from perspective of: " + party
 
-                prompt = "You are an experienced legal analyst specializing in contract review.\n\nDocument Type: " + doc_type + party_part + "\n\nDocument:\n---\n" + legal_text[:10000] + "\n---\n\nGive a thorough legal analysis in this exact format:\n\n## 📋 Document Overview\n[Document type, parties involved, effective date, duration]\n\n## 🔴 High-Risk Clauses (Red Flags)\n[List risky or problematic clauses]\n\n## 🟡 Clauses Requiring Attention\n[List clauses that need review]\n\n## 🟢 Standard and Favorable Clauses\n[List clauses that are standard or favorable]\n\n## 📅 Key Dates and Deadlines\n[List all important dates and notice periods]\n\n## 💰 Financial Obligations\n[List all financial terms, payments, penalties]\n\n## 🔒 Confidentiality and IP\n[Summarize IP ownership and confidentiality]\n\n## 🚪 Termination Conditions\n[How can this be terminated? What are the penalties?]\n\n## ❓ Missing or Ambiguous Clauses\n[Identify missing standard clauses]\n\n## 📝 Negotiation Recommendations\n[Top 5 recommendations before signing]\n\n## 🏁 Summary\n[Overall risk level: LOW / MEDIUM / HIGH, and key takeaway]"
+                prompt = "You are an experienced legal analyst specializing in contract review.\n\nDocument Type: " + doc_type + party_part + "\n\nDocument:\n---\n" + legal_text[:10000] + "\n---\n\nGive a thorough legal analysis in this exact format:\n\n## Document Overview\n[Document type, parties involved, effective date, duration]\n\n##  High-Risk Clauses (Red Flags)\n[List risky or problematic clauses]\n\n## Clauses Requiring Attention\n[List clauses that need review]\n\n## Standard and Favorable Clauses\n[List clauses that are standard or favorable]\n\n##  Key Dates and Deadlines\n[List all important dates and notice periods]\n\n##  Financial Obligations\n[List all financial terms, payments, penalties]\n\n## Confidentiality and IP\n[Summarize IP ownership and confidentiality]\n\n##  Termination Conditions\n[How can this be terminated? What are the penalties?]\n\n##  Missing or Ambiguous Clauses\n[Identify missing standard clauses]\n\n##  Negotiation Recommendations\n[Top 5 recommendations before signing]\n\n##  Summary\n[Overall risk level: LOW / MEDIUM / HIGH, and key takeaway]"
 
                 with st.spinner("Analyzing legal document..."):
                     result = get_ai_response(prompt)
@@ -560,7 +525,7 @@ elif current_page == "Research Summarizer":
             if paper_text:
                 focus_str = ", ".join(focus_areas) if focus_areas else "all sections"
 
-                prompt = "You are an expert research analyst and science communicator.\n\nTarget Audience: " + audience + "\nFocus Areas: " + focus_str + "\n\nResearch Paper:\n---\n" + paper_text[:10000] + "\n---\n\nGive a comprehensive research summary in this exact format:\n\n## 📌 Paper Overview\n- **Title**: [paper title]\n- **Authors and Institution**: [if mentioned]\n- **Published**: [date/journal if mentioned]\n- **Research Type**: [empirical / theoretical / review / meta-analysis]\n\n## 🎯 Core Research Question\n[What problem does this paper address?]\n\n## 💡 Key Hypothesis\n[What is the central claim?]\n\n## 🔬 Methodology\n[How was the research conducted?]\n\n## 📊 Key Findings and Results\n[Most important findings with data]\n\n## ⚡ Novel Contribution\n[What is NEW about this research?]\n\n## ⚠️ Limitations and Caveats\n[What are the limitations?]\n\n## 🌍 Real-World Applications\n[How can findings be applied in practice?]\n\n## 🔮 Future Research Directions\n[What follow-up work is suggested?]\n\n## 🧠 Simple English Summary\n[Explain in 3-4 sentences for a non-expert]\n\n## ⭐ Research Impact\n[Rate: LOW / MEDIUM / HIGH impact with justification]"
+                prompt = "You are an expert research analyst and science communicator.\n\nTarget Audience: " + audience + "\nFocus Areas: " + focus_str + "\n\nResearch Paper:\n---\n" + paper_text[:10000] + "\n---\n\nGive a comprehensive research summary in this exact format:\n\n##  Paper Overview\n- **Title**: [paper title]\n- **Authors and Institution**: [if mentioned]\n- **Published**: [date/journal if mentioned]\n- **Research Type**: [empirical / theoretical / review / meta-analysis]\n\n##  Core Research Question\n[What problem does this paper address?]\n\n## Key Hypothesis\n[What is the central claim?]\n\n## Methodology\n[How was the research conducted?]\n\n##  Key Findings and Results\n[Most important findings with data]\n\n##  Novel Contribution\n[What is NEW about this research?]\n\n## Limitations and Caveats\n[What are the limitations?]\n\n##  Real-World Applications\n[How can findings be applied in practice?]\n\n##  Future Research Directions\n[What follow-up work is suggested?]\n\n## 🧠 Simple English Summary\n[Explain in 3-4 sentences for a non-expert]\n\n## ⭐ Research Impact\n[Rate: LOW / MEDIUM / HIGH impact with justification]"
 
                 with st.spinner("Analyzing research paper..."):
                     result = get_ai_response(prompt)
